@@ -6,6 +6,16 @@ with st.sidebar:
 
 st.title("💬 Chatbot")
 st.caption("🚀 A streamlit chatbot powered by OpenAI LLM")
+
+option = st.selectbox(
+    '请选择您想使用的ChatGPT版本',
+    ('3.5', '4'))
+
+OPTIONS_TO_MODEL = {
+    '3.5': "gpt-3.5-turbo",
+    '4': "gpt-4-turbo-preview",
+}
+
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
 
@@ -20,7 +30,8 @@ if prompt := st.chat_input():
     client = OpenAI(api_key=openai_api_key)
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
-    response = client.chat.completions.create(model="gpt-3.5-turbo", messages=st.session_state.messages)
+    
+    response = client.chat.completions.create(model=OPTIONS_TO_MODEL[option], messages=st.session_state.messages)
     msg = response.choices[0].message.content
     st.session_state.messages.append({"role": "assistant", "content": msg})
     st.chat_message("assistant").write(msg)
