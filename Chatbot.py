@@ -19,8 +19,9 @@ OPTIONS_TO_MODEL = {
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
 
-for msg in st.session_state.messages:
-    st.chat_message(msg["role"]).write(msg["content"])
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
 if prompt := st.chat_input():
     if not openai_api_key:
@@ -29,9 +30,14 @@ if prompt := st.chat_input():
 
     client = OpenAI(api_key=openai_api_key)
     st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(prompt)
+    with st.chat_message("user"):
+        st.markdown(prompt)
     
-    response = client.chat.completions.create(model=OPTIONS_TO_MODEL[option], messages=st.session_state.messages)
-    msg = response.choices[0].message.content
-    st.session_state.messages.append({"role": "assistant", "content": msg})
-    st.chat_message("assistant").write(msg)
+    with st.chat_message("assistant"):
+        stream = client.chat.completions.create(
+            model=OPTIONS_TO_MODEL[option],
+            messages=st.session_state.messages,
+            stream=True,
+        )
+        response = st.write_stream(stream)
+    st.session_state.messages.append({"role": "assistant", "content": response})
