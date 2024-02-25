@@ -34,6 +34,17 @@ STYLE_TO_OPTION = {
     '自然': 'natural',
 }
 
+AVAILABLE_SIZES = {
+    '1024x1024',
+    '1024×1792',
+    '1792x1024',
+}
+
+size = st.selectbox(
+    '分辨率',
+    AVAILABLE_SIZES,
+)
+
 for image_url, user_prompt in st.session_state.image_urls:
     st.image(image_url, caption=user_prompt)
 
@@ -48,11 +59,12 @@ if prompt := st.chat_input():
         response = client.images.generate(
             model="dall-e-3",
             prompt=prompt,
-            size="1024x1024",
+            size=size,
             quality=QUALITY_TO_OPTION[quality],
             style=STYLE_TO_OPTION[style],
             n=1,
         )
+
     image_url = response.data[0].url
     st.image(image_url, caption=prompt)
     st.session_state.image_urls.append((image_url, prompt))
